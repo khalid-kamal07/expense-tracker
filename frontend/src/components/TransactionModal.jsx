@@ -1,0 +1,13 @@
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { inputDate } from '../utils/format';
+
+const categories = ['Food','Transport','Shopping','Bills','Entertainment','Health','Education','Salary','Freelance','Business','Investment','Other'];
+export default function TransactionModal({ open, onClose, onSave, transaction }) {
+  const [form,setForm]=useState({ type:'expense', title:'', amount:'', category:'Food', date:inputDate(new Date()), note:'' });
+  const [saving,setSaving]=useState(false);
+  useEffect(()=>{ if(open) setForm(transaction ? {...transaction, date:inputDate(transaction.date), amount:String(transaction.amount)} : {type:'expense',title:'',amount:'',category:'Food',date:inputDate(new Date()),note:''}); },[open,transaction]);
+  if(!open) return null;
+  const submit=async e=>{e.preventDefault(); setSaving(true); try{await onSave({...form,amount:Number(form.amount)});onClose();}finally{setSaving(false)}};
+  return <div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&onClose()}><form className="modal" onSubmit={submit}><div className="modal-head"><div><p className="eyebrow">TRANSACTION</p><h2>{transaction?'Edit transaction':'Add transaction'}</h2></div><button type="button" className="icon-btn" onClick={onClose}><X/></button></div><div className="type-switch"><button type="button" className={form.type==='expense'?'active expense':''} onClick={()=>setForm({...form,type:'expense'})}>Expense</button><button type="button" className={form.type==='income'?'active income':''} onClick={()=>setForm({...form,type:'income'})}>Income</button></div><div className="form-grid"><label>Title<input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="e.g. Grocery shopping"/></label><label>Amount<input required min="0.01" step="0.01" type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></label><label>Category<select value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>{categories.map(c=><option key={c}>{c}</option>)}</select></label><label>Date<input required type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></label><label className="full">Note <textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} placeholder="Optional note..." rows="3"/></label></div><div className="modal-actions"><button type="button" className="btn secondary" onClick={onClose}>Cancel</button><button disabled={saving} className="btn primary" type="submit">{saving?'Saving...':transaction?'Save changes':'Add transaction'}</button></div></form></div>
+}

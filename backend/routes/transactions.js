@@ -1,0 +1,11 @@
+import express from 'express';
+import { createTransaction, deleteTransaction, listTransactions, summary, updateTransaction } from '../controllers/transactionController.js';
+import { protect } from '../middleware/auth.js';
+const router = express.Router();
+router.use(protect);
+router.get('/', listTransactions);
+router.post('/', createTransaction);
+router.get('/summary', summary);
+router.put('/:id', updateTransaction);
+router.delete('/:id', deleteTransaction);
+export default router;
